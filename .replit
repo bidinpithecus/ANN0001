@@ -1,0 +1,2 @@
+language = "bash"
+run = "cd semana01 && gcc main.c -o main && clear && ./main"
