@@ -16,11 +16,11 @@ void bisection(double(*f)(double), double a, double b, int n) {
 			double m = 0.5 * (a + b);
 			double fm = f(m);
 			if (fm == 0) {
-				printf("Raiz encontrada. r = %.7lf\n", m);
+				printf("Raiz encontrada. r = %.17lf\n", m);
 				return;
 			}
 			if (i + 1 == n) {
-        		printf("%.7lf,", m);
+        		printf("%.17lf,", m);
       		}
 			if (fa * fm < 0) {
 				b = m;
@@ -41,7 +41,7 @@ void newton(double (*f) (double), double (*df) (double), double x0, int n) {
 		}
 		double xi = x0 - f(x0) / dfx0;
 		if (i + 1 == n) {
-     		printf("%.7lf,", xi);
+     		printf("%.17lf,", xi);
     	}
 		x0 = xi;
 	}
@@ -55,8 +55,8 @@ void secant(double (*f)(double), double x0, double x1, int n) {
 			break;
 		}
 		double x2 = (x0 * fx1 - x1 * fx0) / (fx1 - fx0);
-		if (i + 2 == n) {
-			printf("%.7lf,", x2);
+		if (i + 1 == n) {
+			printf("%.17lf,", x2);
 		}
 		x0 = x1;
 		x1 = x2;
@@ -73,13 +73,13 @@ void falsePosition(double (*f)(double), double a, double b, int n) {
 		double x = (a * fb - b * fa) / (fb - fa);
 
 		if (i + 1 == n) {
-		  printf("%.7lf,", x);
+		  printf("%.17lf,", x);
 		}
 
 		double fx = f(x);
 
     if (fx == 0) {
-      printf("A raiz procurada e: x = %.7lf",x);
+      printf("A raiz procurada e: x = %.17lf",x);
       return;
     } else {
   		if (fa * fx < 0) {
@@ -97,7 +97,7 @@ void fixedPoint(double (*f)(double), double x0, int n) {
 	for (int i = 0; i < n; i++) {
 		x0 = f(x0);
 		if (i + 1 == n) {
-			printf("%.7lf,", x0);
+			printf("%.17lf,", x0);
 		}
 	}
 }
