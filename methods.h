@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define PI (3.141592653589793)
+#define PI 3.14159265358979323
 
 // Inicio: Zeros de Função de uma Variável
 
@@ -101,3 +101,7 @@ void fixedPoint(double (*f)(double), double x0, int n) {
 		}
 	}
 }
+
+// Fim: Zeros de Função de uma Variável
+
+// Inicio: Sistemas Lineares
