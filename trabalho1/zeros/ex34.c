@@ -1,4 +1,4 @@
-#include "methodsZero.h"
+#include "methods.h"
 
 #define r1 1.34
 #define r2 5.45

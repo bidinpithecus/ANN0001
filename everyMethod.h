@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <math.h>
-
-#define PI 3.14159265358979323
+#ifndef EVERY_METHOD
+#define EVERY_METHOD
 
 // Inicio: Zeros de Função de uma Variável
 
@@ -105,3 +103,5 @@ void fixedPoint(double (*f)(double), double x0, int n) {
 // Fim: Zeros de Função de uma Variável
 
 // Inicio: Sistemas Lineares
+
+#endif

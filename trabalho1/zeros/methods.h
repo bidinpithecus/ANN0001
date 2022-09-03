@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <math.h>
-
-#define PI 3.14159265358979323
-
-// Inicio: Zeros de Função de uma Variável
+#include "../../utils.h"
 
 void bisection(double(*f)(double), double a, double b, int n) {
 	double fa = f(a);
@@ -101,7 +96,3 @@ void fixedPoint(double (*f)(double), double x0, int n) {
 		}
 	}
 }
-
-// Fim: Zeros de Função de uma Variável
-
-// Inicio: Sistemas Lineares
