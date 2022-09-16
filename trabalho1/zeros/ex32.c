@@ -15,7 +15,7 @@ int main(void) {
 	int iterationsBissection[] = {2, 4, 8, 12};
 	int iterationsNewton[] = {1, 3, 5};
 	int iterationsSecant[] = {1, 2, 5};
-	int iterationsFalsePosition[] = {2, 4, 7, 11};
+	int iterationsFalsePosition[] = {2, 5, 7, 11};
 
 	// Método da Bisseção
 	for(int i = 0; i < sizeof(iterationsBissection) / sizeof(iterationsBissection[0]); i++) {
