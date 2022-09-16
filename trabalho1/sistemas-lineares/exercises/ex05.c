@@ -5,11 +5,12 @@ int main(void) {
 	int *cols = malloc(sizeof(int));
 	double **matrix = Matrix(rows, cols);
 	double *arr = malloc((*rows) * sizeof(double));
-	arr[0] = -3.15;
-	arr[1] = -1.4;
-	arr[2] = -4.64;
-	int iterations[] = {4, 6, 8, 12, 13, 14, 16, 19};
-	int numIterations = 8;
+	arr[0] = 0.37;
+	arr[1] = -3.45;
+	arr[2] = 3.22;
+	arr[3] = 3.61;
+	int iterations[] = {3, 6, 8, 10, 11, 15, 16, 19, 23, 24, 26, 29};
+	int numIterations = sizeof(iterations)/sizeof(int);
 
 	printMatrix(matrix, *rows, *cols);
 	jacobi(matrix, *rows, *cols, arr, iterations[numIterations-1] + 1, iterations);
