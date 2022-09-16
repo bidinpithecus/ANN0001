@@ -23,24 +23,28 @@ void gaussJordan(double **matrix, int rows, int cols) {
 	}
 }
 
-void jacobi(double **matrix, int rows, int cols, double *vetor, int n) {
+void jacobi(double **matrix, int rows, int cols, double *arr, int n) {
+	int iterations[] = {4, 6, 8, 12, 13, 14, 16, 19};
+	int index = 0;
   for (int k = 0; k < n; k++) {
-		double tempVetor[rows];
+		double tempArr[rows];
 		for (int i = 0; i < rows; i++) {
 			double temp = 0;
+			double bi = matrix[i][cols - 1];
 			for (int j = 0; j < cols; j++) {
-				if (j != i && j != cols - 1) {
-					temp += (-matrix[i][j] * vetor[j]) / matrix[i][i];
-				}
-				else if (j == cols - 1) {
-					temp += ((matrix[i][j]) / matrix[i][i]);
+				if (j != i) {
+					temp -= matrix[i][j] * arr[j];
 				}
 			}
-			tempVetor[i] = temp;
+			double xi = (bi + temp) / matrix[i][i];
+			tempArr[i] = xi;
+			if (k == iterations[index]) {
+				printArr(arr, rows);
+				index++;
+			}
 		}
 		for(int i = 0; i < rows; i++) {
-			vetor[i] = tempVetor[i];
+			arr[i] = tempArr[i];
 		}
   }
-  printVetor(vetor, rows);
 }

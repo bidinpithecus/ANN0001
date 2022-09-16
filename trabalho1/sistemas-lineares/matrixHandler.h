@@ -1,7 +1,6 @@
-void printVetor(double *vetor, int rows){
+void printArr(double *Arr, int rows){
     for(int i = 0; i < rows; i++){ 
-        //printf("x_%i = %.17f\n", i+1, vetor[i]);
-        printf("%.7f, ", vetor[i]);
+        printf("%.7f, ", Arr[i]);
     }
     printf("\n");
 }
