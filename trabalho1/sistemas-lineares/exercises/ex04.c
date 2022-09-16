@@ -9,9 +9,10 @@ int main(void) {
 	arr[1] = 4.94;
 	arr[2] = 2.02;
 	int iterations[] = {4, 6, 8, 12, 13, 14, 16, 19};
+	int numIterations = 8;
 
 	printMatrix(matrix, *rows, *cols);
-	jacobi(matrix, *rows, *cols, arr, 20);
+	jacobi(matrix, *rows, *cols, arr, iterations[numIterations-1] + 1, iterations);
 
 	return 0;
 }
