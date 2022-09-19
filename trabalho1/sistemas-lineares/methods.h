@@ -45,21 +45,21 @@ void jacobi(double **matrix, int rows, int cols, double *arr, int n, int *iterat
 		for(int i = 0; i < rows; i++) {
 			arr[i] = tempArr[i];
 		}
-  	}
+	}
 }
 
 void seidel(double **matrix, int rows, int cols, double *arr, int n) {
-    for (int k = 0; k < n; k++) {
-        for (int i = 0; i < rows; i++) {
-            double temp = 0;
-            for (int j = 0; j < cols; j++) {
-                if (j != i && j != cols-1) {
+	for (int k = 0; k < n; k++) {
+		for (int i = 0; i < rows; i++) {
+			double temp = 0;
+			for (int j = 0; j < cols; j++) {
+				if (j != i && j != cols-1) {
 					temp += (-matrix[i][j] * arr[j]) / matrix[i][i];
 				} else if (j == cols-1) {
 					temp += ((matrix[i][j]) / matrix[i][i]);
 				}
-            }
-            arr[i] = temp;
-        }
-    }
+			}
+			arr[i] = temp;
+		}
+	}
 }
