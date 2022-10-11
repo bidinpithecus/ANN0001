@@ -4,3 +4,4 @@ main
 .o
 *.out
 __pycache__/
+build/
