@@ -1,0 +1,7 @@
+from methods import *
+
+x0 = 0.83202
+approximations = [0.15128380991513346, 0.10809507608720281, 0.08534367627672523, 0.07375623174958434, 0.06791887063145907, 0.06499041657460225]
+
+new_value = richardson(approximations.copy())
+print(new_value)
