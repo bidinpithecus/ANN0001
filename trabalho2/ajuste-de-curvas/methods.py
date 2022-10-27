@@ -16,7 +16,7 @@ def best_poly (x, y, k):
     n = len(x)
     if n <= k:
         raise ValueError('O número de pontos deve ser maior que k (o grau do polinômio)')
-
+    A_printado = []
     somas = {}
     somas[0] = n
     for n in range(1, 2*k + 1):
@@ -27,12 +27,14 @@ def best_poly (x, y, k):
         row = []
         for j in range(k + 1):
             row.append(somas[i + j])
+            A_printado.append(somas[i+j])
         A.append(row)
         if i == 0:
             B.append(sum(y))
         else:
             B.append(sum(xi ** i * yi for xi, yi in zip(x,y)))
-    return np.linalg.solve(A, B)
+    print('Matriz A:\n',A_printado,'\n''Matriz B:\n',B)
+    return A_printado, B, np.linalg.solve(A, B)
 
 def best_poly_func_exp(x, y, grau = 1):
     k = grau + 1
