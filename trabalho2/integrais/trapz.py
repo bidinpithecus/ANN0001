@@ -1,29 +1,15 @@
-import math
-from numpy import double
-
-# Usado para aproximar o valor de uma integral
-def trapz(f, a, b, n):
-    h = (b-a) / n
-    soma = 0
-    for k in range(1, n):
-        soma += f(a + k*h)
-    soma *= 2
-    soma += (f(a) + f(b))
-    return (h/2) * soma
-
+from methods import *
 
 def f(x):
-    return math.sqrt(math.sin(math.cos(math.log(x**2+1)+2)+3)+4)
+    return math.sin(x / (math.sqrt(math.pow(x, 2) + 1))) + 1
 
-# Variável inferior
-a = -1.448
-
-# Variável superior
-b = 1.97
-
+# Variável inferior, Variável superior
 # Lista de subintervalos
-n = [4, 14, 41, 67, 99, 110, 218, 353, 710, 909, 2056, 6533]
 
-for i in range(len(n)):
-    r = trapz(f, a, b, n[i])
-    print(r)
+intervalo = [-1.013, 1.448]
+subintervalos = [1, 24, 43, 60, 75, 102, 235, 420, 558, 917, 1795, 9155]
+
+for i in range(len(subintervalos)):
+    r = trapz(f, intervalo[0], intervalo[1], subintervalos[i])
+    print(r, end=', ')
+print("\n")

@@ -42,7 +42,7 @@ int main() {
     // Exemplo
     // Aproximar int exp(-x*x), de 0 a 1
     if (ERROR_ORDER /2 != numElemsFirstCol) {
-        return;
+        return 0;
     }
 
     double a = 0;
