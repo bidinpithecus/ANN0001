@@ -1,14 +1,12 @@
-"""
-Sejam
+"""Sejam
 f1(x)=1, f2(x)=x, f3(x)=x2, f4(x)=x3, f5(x)=x4, f6(x)=x5, f7(x)=x6, f8(x)=x7  e  f9(x)=x8
 Encontre os coeficientes da combinação linear
 g(x)=c1f1(x)+c2f2(x)+c3f3(x)+c4f4(x)+c5f5(x)+c6f6(x)+c7f7(x)+c8f8(x)+c9f9(x)
-que melhor se aproxima da função f(x)=x2exln(2+cos(−x2))−−−−−−−−−−−−−√ no intervalo [a,b], com a=−2.07358 e b=0.91722. Para o cálculo dos coeficientes ck, use a regra de Simpson com 256 subintervalos. Em seguida calcule g(x) para os seguintes valores de x
-x1=−1.40592, x2=−0.94359 e x3=0.39403.
-A função g(x) é uma aproximação para a função f(x) no intervalo [−2.07358,0.91722] com erro dado por
-erro=∫0.91722−2.07358[f(x)−g(x)]2dx.
-Use o método de Romberg com h=(b−a)/10 e erro da ordem de O(h8) para determinar o erro.
-"""
+que melhor se aproxima da função f(x)=x2exln(2+cos(−x2))−−−−−−−−−−−−−√ no intervalo [a,b], com a=−2.06485 e b=0.84178. Para o cálculo dos coeficientes ck, use a regra de Simpson com 256 subintervalos. Em seguida calcule g(x) para os seguintes valores de x
+x1=−1.53854, x2=−0.88865 e x3=0.46267.
+A função g(x) é uma aproximação para a função f(x) no intervalo [−2.06485,0.84178] com erro dado por
+erro=∫0.84178−2.06485[f(x)−g(x)]2dx.
+Use o método de Romberg com h=(b−a)/10 e erro da ordem de O(h8) para determinar o erro."""
 
 import numpy as np
 import math
@@ -100,21 +98,32 @@ def build_func(s, var: str='x'):
     exec(func, scope)
     return scope['f']
 
+
 if __name__ == '__main__':
+
+    
+
     def func(x):
          return  x**2 * math.exp(x) * math.sqrt(math.log(2 + math.cos(-x**2)))
 
     funcs_str =   ['1', 'x', 'x**2', 'x**3', 'x**4', 'x**5', 'x**6', 'x**7', 'x**8']
-    a = -2.07358
-    b = 0.91722
+    a = -2.06485
+    b = 0.84178
     n = 256
     order = 8
+
 
     funcs = []
     for func_str in funcs_str:
         f = build_func(func_str)
         funcs.append(f)
 
+   
+    
+
+    
+    
+    
     coefs = aprox(func, funcs, a, b, n)
     #essa é a funçao g que melhor se aproxima f(x)
     
@@ -122,16 +131,19 @@ if __name__ == '__main__':
     
     for i in coefs:
         print(f"{i}, ")
-    x1 = g(-1.40592)
+
+    x1 = g(-1.53854)
     print(f'{x1},')
-    x2 = g(-0.94359)
+    x2 = g(-0.88865 )
     print(f'{x2},')
-    x3 = g(0.39403)
+    x3 = g(0.46267)
     print(f'{x3},')
+
 
     def ferro(x):
         return (func(x) - g(x))**2
 
+    
     h = (b-(a))/10
     erro_da_ordem = int(order/2)
     hs = [h / 2 ** i for i in range(erro_da_ordem)]

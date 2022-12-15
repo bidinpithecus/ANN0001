@@ -1,7 +1,164 @@
-'''Use o método da quadratura gaussiana, para aproximar cada uma das integrais a 
-seguir de modo que a aproximação seja exata em polinômios de grau menor que k.'''
-
 import math
+import numpy as np
+
+'''
+Seja Tn o polinômio de Chebyshev de grau n definido no intervalo [-1,1] por
+Tn(x)=cos(n⋅arccos(x)).
+Seja
+g(x)=c0T0(x)+c1T1(x)+c2T2(x)+⋯+c21T21(x)
+uma combinação linear dos 22 primeiros polinômios de Chebyshev. Encontre os coeficientes c0,c1,…,c21 tal que g(x) se aproxime o melhor possível da função f(x)=ln(1+x2)sin(10x) no intervalo [-1,1]. Para o cálculo dos coeficientes ck, use o método da quadratura gaussiana que seja exato em polinômios de grau menor que 26. Em seguida calcule g(x) para os seguintes valores de x
+x1=-0.692, x2=0.059 e x3=0.802.
+A função g(x) é uma aproximação para a função f(x) no intervalo [-1,1] com erro dado por
+erro=∫1-1[f(x)-g(x)]2dx.
+Use a regra dos trapézios com 4096 subintervalos para determinar o erro.
+'''
+
+def trapz(f, a, b, n):
+    h = abs(b - a) / n
+    sum_fx = 0
+
+    for i in range(1, n):
+        sum_fx += f(a + i * h)
+
+    return (f(a) + 2 * sum_fx + f(b)) * (h / 2)
+
+
+def simps(f, a, b, n):
+    if n % 2 != 0:
+        print('O valor n deve ser par')
+        return None
+
+    num_parabolas = n / 2
+    soma = 0
+    h = (b - a) / n
+
+    for i in range(int(num_parabolas)):
+        x0 = a + (2 * i) * h
+        x1 = a + (2 * i + 1) * h
+        x2 = a + (2 * i + 2) * h
+        soma += f(x0) + 4 * f(x1) + f(x2)
+
+    soma *= h / 3
+
+    return soma
+
+
+def trapz_romberg(f, a, b, h):
+    n = int((b - a) / h)
+    soma = 0
+
+    for k in range(1, n):
+        soma += f(a + k * h)
+
+    return (h / 2) * (f(a) + 2 * soma + f(b))
+
+
+def romberg(coluna_f1):
+    coluna_f1 = [i for i in coluna_f1]
+    n = len(coluna_f1)
+    for j in range(n - 1):
+        temp_col = [0] * (n - 1 - j)
+        for i in range(n - 1 - j):
+            power = j + 1
+            temp_col[i] = (4 ** power * coluna_f1[i + 1] - coluna_f1[i]) / (4 ** power - 1)
+        coluna_f1[:n - 1 - j] = temp_col
+        # print(f'F_{j+2} = {temp_col}')
+    return coluna_f1[0]
+
+
+def best_func(f, funcs, a, b, method: ['trapz', 256]):
+    k = len(funcs)
+
+    A = [[0 for _ in range(k)] for _ in range(k)]
+    B = []
+
+    for i in range(k):
+        for j in range(k):
+            if j >= i:
+                def f_ij(x):
+                    return  funcs[j](x) * funcs[i](x)
+
+                if method[0] == 'trapz':
+                    A[i][j] = trapz(f_ij, a, b, method[1])
+                elif method[0] == 'simps':
+                    A[i][j] = simps(f_ij, a, b, method[1])
+                elif method[0] == 'romberg':
+                    tam = int(method[1] / 2)
+                    hs = [method[2] / 2 ** ki for ki in range(tam)]
+                    coluna_f1 = [trapz_romberg(f_ij, a, b, hi) for hi in hs]
+                    A[i][j] = romberg(coluna_f1)
+                elif method[0] == 'quadratura':
+                    A[i][j] = quadratura(change(f_ij, a, b), method[1], method[2])
+
+            else:
+                A[i][j] = A[j][i]
+
+        def ffi(x):
+            return f(x) * funcs[i](x)
+
+        if method[0] == 'trapz':
+            B.append(trapz(ffi, a, b, method[1]))
+        elif method[0] == 'simps':
+            B.append(simps(ffi, a, b, method[1]))
+        elif method[0] == 'romberg':
+            tam = int(method[1] / 2)
+            hs = [method[2] / 2 ** ki for ki in range(tam)]
+            coluna_f1 = [trapz_romberg(ffi, a, b, hi) for hi in hs]
+            B.append(romberg(coluna_f1))
+        elif method[0] == 'quadratura':
+            B.append(quadratura(change(ffi, a, b), method[1], method[2]))
+
+    A = np.array(A, dtype=float)
+    B = np.array(B, dtype=float)
+
+    return np.linalg.solve(A, B)
+
+
+def quadratura(funcao, pontos, pesos):
+    soma = 0
+
+    for xk, ck in zip(pontos, pesos):
+        soma += ck * funcao(xk)
+
+    return soma
+
+
+def change(f, a, b):
+    def g(u):
+        return f((b + a) / 2 + (b - a) * u / 2) * (b - a) / 2
+
+    return g
+
+
+def chebyshev(x, n):
+    f0 = 1.0
+    f1 = x
+    fn = 0
+
+    ni = 2
+
+    if n == 0:
+      return 1.0
+
+    elif n == 1:
+      return x
+
+    else:
+
+      while ni <= n:
+          fn = 2*x*f1 - f0
+          f0 = f1
+          f1 = fn
+          ni += 1 
+
+    return fn
+
+def build_chebyshev_polynomial(n):
+    def temp(t):
+        return chebyshev(t, n)
+
+    return temp
+
 
 if __name__ == '__main__':
     raiz2 = [-0.5773502691896257, 0.5773502691896257]
@@ -127,40 +284,44 @@ if __name__ == '__main__':
               0.10193011981724044, 0.10193011981724044, 0.08327674157670475, 0.08327674157670475, 0.06267204833410907,
               0.06267204833410907, 0.04060142980038694, 0.04060142980038694, 0.017614007139152118, 0.017614007139152118]
 
+    def f(x):
+      return  math.log(1 + x**2) * math.sin(10*x)
 
-    def f(nome_funcao, value):
-        x = value
-        return eval(nome_funcao)
+    grau = 22
 
-    # def quadratura(nome_funcao, pontos, pesos):
-    #     soma = 0
-    #
-    #     for xk, ck in zip(pontos, pesos):
-    #         soma += ck*f(nome_funcao, xk)
-    #
-    #     return soma
+    a = -1
+    b = 1
+    exact_for_degree_less_than = 26
+    order = str(int(exact_for_degree_less_than / 2))
+    txt_order = ['raiz' + order, 'peso' + order]
+    method =  ['quadratura', locals()[txt_order[0]], locals()[txt_order[1]]]
 
-    def quadratura(funcao, pontos, pesos):
-        soma = 0
+    subintervalo_para_erro = 4096
+    funcs = [build_chebyshev_polynomial(i) for i in range(grau)]
 
-        for xk, ck in zip(pontos, pesos):
-            soma += ck*funcao(xk)
+    values = [-0.493, -0.1, 0.816]
+    coefs = best_func(f, funcs, a, b, method)
 
-        return soma
+    coefs = [ci for ci in coefs]
+
+    for i in coefs:
+        print(f'{i}, ')
+
+    print()
+
+    def g(x):
+        return sum(ci * fi(x) for ci, fi in zip(coefs, funcs))
 
 
-    def change(nome_funcao, a, b):
-        def g(u):
-            return f(nome_funcao, (b+a)/2 + (b-a)*u/2) * (b-a)/2
-        return g
+    for x in values:
+        print(f'{g(x)}, ')
 
 
-    funcs = ['math.exp(-x**2)', 'math.cos(-x**2/3)', 'math.log(math.sqrt(1+x**2))', 'math.exp(x)*math.sin(x)/(1+x**2)', '(x+1/x)**2']
-    a = [-0.83, -1.963, 1.925, 0.434, 0.753]
-    b = [0.883, 1.305, 3.298, 2.076, 2.313]
-    exact_for_degree_less_than = [4, 6, 8, 12, 10]
-    for i in range(len(funcs)):
-        order = str(int(exact_for_degree_less_than[i]/2))
-        txt_order = ['raiz'+order, 'peso'+order]
-        r = quadratura(change(funcs[i], a[i], b[i]), locals()[txt_order[0]], locals()[txt_order[1]])
-        print(f'{r}, ')
+    print()
+
+    def func_erro(x):
+        return (f(x) - g(x)) ** 2
+
+    erro = trapz(func_erro,a,b, subintervalo_para_erro)
+
+    print(erro)

@@ -1,300 +1,154 @@
-""" Sejam
-f1(x)=1, f2(x)=x, f3(x)=cos(x), f4(x)=x2, f5(x)=sin(x), f6(x)=x3, f7(x)=cos(2x), f8(x)=x4  e  f9(x)=sin(3x)
-Encontre os coeficientes da combinação linear
-g(x)=c1f1(x)+c2f2(x)+c3f3(x)+c4f4(x)+c5f5(x)+c6f6(x)+c7f7(x)+c8f8(x)+c9f9(x)
-que melhor se aproxima da função f(x)=xsin(4xcos(ln(1+x2))) no intervalo [a,b], com a=0.154 e b=2.007. Para o cálculo dos coeficientes ci, use o método da quadratura gaussiana que seja exato em polinômios de grau menor que 24. Em seguida calcule g(x) para os seguintes valores de x
-x1=0.235, x2=1.065 e x3=1.501.
-A função g(x) é uma aproximação para a função f(x) no intervalo [0.154,2.007] com erro dado por
-erro=∫2.0070.154[f(x)−g(x)]2dx.
-Use o método da quadratura gaussiana com 10 nós para determinar o erro. """
-
-
-import math
+from math import *
 import numpy as np
 
-def trapz(f, a, b, n):
-    h = abs(b - a) / n
-    sum_fx = 0
-
-    for i in range(1, n):
-        sum_fx += f(a + i * h)
-
-    return (f(a) + 2 * sum_fx + f(b)) * h / 2
-
-
-def trapz_romberg(f, a, b, h):
-    n = int((b - a) / h)
-    soma = 0
-
+# Métodos de integração (necessários para solução do sistema de equações):
+def trapeze_sum(f, a, b, n):
+    sum = f(a)/2 + f(b)/2
+    base = (b-a)/n
+    # Lembre-se que x0 = a e xn = b, por isso no seguinte loop k varia de 1 até n-1:
     for k in range(1, n):
-        soma += f(a + k * h)
+        sum += f(a + k*base)
+    area = base*sum
+    return area
 
-    return (h / 2) * (f(a) + 2 * soma + f(b))
-
-
-def romberg(coluna_f1):
-    coluna_f1 = [i for i in coluna_f1]
-    n = len(coluna_f1)
-    for j in range(n - 1):
-        temp_col = [0] * (n - 1 - j)
-        for i in range(n - 1 - j):
-            power = j + 1
-            temp_col[i] = (4 ** power * coluna_f1[i + 1] - coluna_f1[i]) / (4 ** power - 1)
-        coluna_f1[:n - 1 - j] = temp_col
-        # print(f'F_{j+2} = {temp_col}')
-    return coluna_f1[0]
-
-
-def best_func(f, funcs, a, b, method: ['trapz', 256]):
-    k = len(funcs)
-
-    A = [[0 for _ in range(k)] for _ in range(k)]
-    B = []
+def richardson(f, a, b, n, k):
+    # Lembre-se que h = (b-a)/n ; o valor de n é dado indiretamente nas questões...
+    table = []
+    # Obs.: dada essa função de erro inicial tem-se que Fk(h) diminui o erro para O(h^(2*k))
+    k = int(k/2)
 
     for i in range(k):
-        for j in range(k):
-            if j >= i:
-                def f_ij(x):
-                    return funcs[j](x) * funcs[i](x)
+        item = trapeze_sum(f, a, b, (2**i)*n)
+        table.append(item)
 
-                if method[0] == 'trapz':
-                    A[i][j] = trapz(f_ij, a, b, method[1])
-                elif method[0] == 'romberg':
-                    tam = int(method[1] / 2)
-                    hs = [method[2] / 2 ** ki for ki in range(tam)]
-                    coluna_f1 = [trapz_romberg(f_ij, a, b, hi) for hi in hs]
-                    A[i][j] = romberg(coluna_f1)
-                elif method[0] == 'quadratura':
-                    A[i][j] = quadratura(change(f_ij, a, b), method[1], method[2])
+    for i in range(k):
+        for j in range(k-i-1):
+            new_item = ((4**(i+1))*table[j+1] - table[j])/(4**(i+1) - 1)
+            table[j] = new_item
+    return table[0]
 
-            else:
-                A[i][j] = A[j][i]
+def simpson(f, a, b, num_subintervals):
 
-        def ffi(x):
-            return f(x) * funcs[i](x)
+    # Obs.: num_intervals(n) é o número de subintervalos, n/2 é o número de parábolas e n+1 é o número de pontos na partição.
+    h = (b-a)/num_subintervals
+    sum = f(a) + f(b)
 
-        if method[0] == 'trapz':
-            B.append(trapz(ffi, a, b, method[1]))
-        elif method[0] == 'romberg':
-            tam = int(method[1] / 2)
-            hs = [method[2] / 2 ** ki for ki in range(tam)]
-            coluna_f1 = [trapz_romberg(ffi, a, b, hi) for hi in hs]
-            B.append(romberg(coluna_f1))
-        elif method[0] == 'quadratura':
-            B.append(quadratura(change(ffi, a, b), method[1], method[2]))
+    # k varia até 2n
+    for k in range(2, num_subintervals, 2):
+        sum += 2*f(a + k*h)
 
-    A = np.array(A, dtype=float)
-    B = np.array(B, dtype=float)
+    # k varia até 2n-1 (quando k = 2n+1 o loop para)
+    for k in range(1, num_subintervals, 2):
+        sum += 4*f(a + k*h)
 
-    return np.linalg.solve(A, B)
+    sum = (h/3)*sum        
+    return sum
 
+# Um monte de de funções apenas para a quadratura gaussiana:
+def quadrature(f, a, b, cord, coeffs):
 
-def criar_funcoes(lista_funcoes):
-    for indice, funcao in enumerate(lista_funcoes):
-        scope = {
-            'lista_funcoes': lista_funcoes,
-            'indice': indice,
-            'funcao': funcao,
-            'math': math
-        }
+    g = change(f, a, b)
 
-        exec('lista_funcoes[indice] = lambda x:eval(funcao)', scope)
+    # exact_for_degree_less_than = 24
+    # order = str(int(exact_for_degree_less_than/2))    
+    # lists_names = ['raiz'+order, 'peso'+order]
 
-    return lista_funcoes
+    # cord = locals()[lists_names[0]]
+    # coeffs = locals()[lists_names[1]]
+    
+    sum = 0
+    for xi, ci in zip(cord, coeffs):
+        sum += ci*g(xi)
+    return sum
 
+# Transforma string em função:
+def stringToFunc(string):
+    def f(x):
+        return eval(string)
+    return f
 
-def quadratura(funcao, pontos, pesos):
-    soma = 0
-
-    for xk, ck in zip(pontos, pesos):
-        soma += ck * funcao(xk)
-
-    return soma
-
-
+# Mudança de variável na função f para se encaixar nos limites de integração [-1, 1]:
 def change(f, a, b):
     def g(u):
-        return f((b + a) / 2 + (b - a) * u / 2) * (b - a) / 2
-
+        return f((b+a)/2 + (b-a) * (u/2)) * (b-a)/2
     return g
 
+def aprox_coeffs(func_list, f, a, b, cord, coeffs):
+    A = []
+    B = []
+    # Obs.: note que a matriz A é simétrica portanto não precisamos calcular n² integrais
+    for i, fi in enumerate(func_list):
+        row = []
+        b_i = quadrature(lambda x: f(x)*fi(x), a, b, cord, coeffs)
+        for j, fj in enumerate(func_list):
+            """
+            Note que:
+            (1) a_ij = ∫ fj(x)*fi(x) dx;
+            (2) visto que a matriz A é simétrica e a parte acima da diagonal é calculada primeiro,
+            não é necessário calcular os elementos em que i > j.
+            """
+            if(i <= j):
+                a_ij = quadrature(lambda x: fi(x)*fj(x), a, b, cord, coeffs)
+                row.append(a_ij)
+            else:
+                row.append(A[j][i])
+        B.append(b_i)
+        A.append(row)
+    return np.linalg.solve(A, B)
 
-def f(x):
-    return  x * math.sin(4 * x * math.cos(math.log(1 + x**2)))
+"""
+Observe que são calculadas n integrais na diagonal + [(n-1) + (n-2) + ... + 2 + 1] integrais das diagonais acima + n integras das integrais
+na matriz B, o que resulta em n(n+1)/2 + n = (n² + 3n)/2 integrais, o que é mesmo assim uma valor O(n²) apesar da otimização em relação aos
+elementos iguais (pela simetria da matriz).
+"""
 
+def build_aprox_func(func_list, coeffs):
+    def g(x):
+        return sum(ck*fk(x) for ck, fk in zip(coeffs, func_list))
+    return g
 
 if __name__ == '__main__':
-    raiz2 = [-0.5773502691896257, 0.5773502691896257]
-    peso2 = [1.0, 1.0]
+    # Listas de pontos e pesos para quadratura gaussiana:
+    from NodesAndWeights import *
 
-    raiz3 = [0, -0.7745966692414834, 0.7745966692414834]
-    peso3 = [0.8888888888888888, 0.5555555555555556, 0.5555555555555556]
+    exact_for_degree_less_than = 24
+    order = str(int(exact_for_degree_less_than/2))    
+    lists_names = ['raiz'+order, 'peso'+order]
 
-    raiz4 = [-0.33998104358485626, 0.33998104358485626, -0.8611363115940526, 0.8611363115940526]
-    peso4 = [0.6521451548625461, 0.6521451548625461, 0.34785484513745385, 0.34785484513745385]
+    cord = locals()[lists_names[0]]
+    coeffs = locals()[lists_names[1]]
 
-    raiz5 = [0, -0.5384693101056831, 0.5384693101056831, -0.906179845938664, 0.906179845938664]
-    peso5 = [0.5688888888888889, 0.47862867049936647, 0.47862867049936647, 0.23692688505618908, 0.23692688505618908]
 
-    raiz6 = [0.6612093864662645, -0.6612093864662645, -0.2386191860831969, 0.2386191860831969, -0.932469514203152,
-             0.932469514203152]
-    peso6 = [0.3607615730481386, 0.3607615730481386, 0.46791393457269104, 0.46791393457269104, 0.17132449237917036,
-             0.17132449237917036]
+    # Exemplo 01:
+    func_list = [lambda x: 1, lambda x: x, lambda x: cos(x), lambda x: x**2, lambda x: sin(x), lambda x: x**3, lambda x: cos(2*x),
+        lambda x: x**4, lambda x: sin(3*x)]
 
-    raiz7 = [0, 0.4058451513773972, -0.4058451513773972, -0.7415311855993945, 0.7415311855993945, -0.9491079123427585,
-             0.9491079123427585]
-    peso7 = [0.4179591836734694, 0.3818300505051189, 0.3818300505051189, 0.27970539148927664, 0.27970539148927664,
-             0.1294849661688697, 0.1294849661688697]
+    def f(x):
+        return x * sin(4 * x * cos(log(1 + x**2)))
 
-    raiz8 = [-0.1834346424956498, 0.1834346424956498, -0.525532409916329, 0.525532409916329, -0.7966664774136267,
-             0.7966664774136267, -0.9602898564975363, 0.9602898564975363]
-    peso8 = [0.362683783378362, 0.362683783378362, 0.31370664587788727, 0.31370664587788727, 0.22238103445337448,
-             0.22238103445337448, 0.10122853629037626, 0.10122853629037626]
+    a = 0.16304
+    b = 2.09243
+    # Obs.01: o valor de n não importa aqui pois estaremos usando o método da quadratura gaussiana.
+    # Obs.02: k é definido dentro da função para uso do método de Romberg (função 'Richardson').
 
-    raiz9 = [0, -0.8360311073266358, 0.8360311073266358, -0.9681602395076261, 0.9681602395076261, -0.3242534234038089,
-             0.3242534234038089, -0.6133714327005904, 0.6133714327005904]
-    peso9 = [0.3302393550012598, 0.1806481606948574, 0.1806481606948574, 0.08127438836157441, 0.08127438836157441,
-             0.31234707704000286, 0.31234707704000286, 0.26061069640293544, 0.26061069640293544]
+    coeffs = aprox_coeffs(func_list, f, a, b, cord, coeffs)
+    for ck in coeffs: 
+        print(f"{ck},")
 
-    raiz10 = [-0.14887433898163122, 0.14887433898163122, -0.4333953941292472, 0.4333953941292472, -0.6794095682990244,
-              0.6794095682990244, -0.8650633666889845, 0.8650633666889845, -0.9739065285171717, 0.9739065285171717]
-    peso10 = [0.29552422471475287, 0.29552422471475287, 0.26926671930999635, 0.26926671930999635, 0.21908636251598204,
-              0.21908636251598204, 0.1494513491505806, 0.1494513491505806, 0.06667134430868814, 0.06667134430868814]
+    g = build_aprox_func(func_list, coeffs)
+    values = [0.42967, 1.2785, 1.92429]
 
-    raiz11 = [0, -0.26954315595234496, 0.26954315595234496, -0.5190961292068118, 0.5190961292068118,
-              -0.7301520055740494,
-              0.7301520055740494, -0.8870625997680953, 0.8870625997680953, -0.978228658146057, 0.978228658146057]
-    peso11 = [0.2729250867779006, 0.26280454451024665, 0.26280454451024665, 0.23319376459199048, 0.23319376459199048,
-              0.18629021092773426, 0.18629021092773426, 0.1255803694649046, 0.1255803694649046, 0.05566856711617366,
-              0.05566856711617366]
+    for xi in values:
+        print(f"{g(xi)},")
 
-    raiz12 = [-0.1252334085114689, 0.1252334085114689, -0.3678314989981802, 0.3678314989981802, -0.5873179542866175,
-              0.5873179542866175, -0.7699026741943047, 0.7699026741943047, -0.9041172563704749, 0.9041172563704749,
-              -0.9815606342467192, 0.9815606342467192]
-    peso12 = [0.24914704581340277, 0.24914704581340277, 0.2334925365383548, 0.2334925365383548, 0.20316742672306592,
-              0.20316742672306592, 0.16007832854334622, 0.16007832854334622, 0.10693932599531843, 0.10693932599531843,
-              0.04717533638651183, 0.04717533638651183]
-
-    raiz13 = [0, -0.2304583159551348, 0.2304583159551348, -0.44849275103644687, 0.44849275103644687,
-              -0.6423493394403402,
-              0.6423493394403402, -0.8015780907333099, 0.8015780907333099, -0.9175983992229779, 0.9175983992229779,
-              -0.9841830547185881, 0.9841830547185881]
-    peso13 = [0.2325515532308739, 0.22628318026289723, 0.22628318026289723, 0.2078160475368885, 0.2078160475368885,
-              0.17814598076194574, 0.17814598076194574, 0.13887351021978725, 0.13887351021978725, 0.09212149983772845,
-              0.09212149983772845, 0.04048400476531588, 0.04048400476531588]
-
-    raiz14 = [-0.10805494870734367, 0.10805494870734367, -0.31911236892788974, 0.31911236892788974, -0.5152486363581541,
-              0.5152486363581541, -0.6872929048116855, 0.6872929048116855, -0.827201315069765, 0.827201315069765,
-              -0.9284348836635735, 0.9284348836635735, -0.9862838086968123, 0.9862838086968123]
-    peso14 = [0.2152638534631578, 0.2152638534631578, 0.2051984637212956, 0.2051984637212956, 0.18553839747793782,
-              0.18553839747793782, 0.15720316715819355, 0.15720316715819355, 0.12151857068790319, 0.12151857068790319,
-              0.08015808715976021, 0.08015808715976021, 0.03511946033175186, 0.03511946033175186]
-
-    raiz15 = [0, -0.20119409399743451, 0.20119409399743451, -0.3941513470775634, 0.3941513470775634,
-              -0.5709721726085388,
-              0.5709721726085388, -0.7244177313601701, 0.7244177313601701, -0.8482065834104272, 0.8482065834104272,
-              -0.937273392400706, 0.937273392400706, -0.9879925180204854, 0.9879925180204854]
-    peso15 = [0.2025782419255613, 0.19843148532711158, 0.19843148532711158, 0.1861610000155622, 0.1861610000155622,
-              0.16626920581699392, 0.16626920581699392, 0.13957067792615432, 0.13957067792615432, 0.10715922046717194,
-              0.10715922046717194, 0.07036604748810812, 0.07036604748810812, 0.03075324199611727, 0.03075324199611727]
-
-    raiz16 = [-0.09501250983763744, 0.09501250983763744, -0.2816035507792589, 0.2816035507792589, -0.45801677765722737,
-              0.45801677765722737, -0.6178762444026438, 0.6178762444026438, -0.755404408355003, 0.755404408355003,
-              -0.8656312023878318, 0.8656312023878318, -0.9445750230732326, 0.9445750230732326, -0.9894009349916499,
-              0.9894009349916499]
-    peso16 = [0.1894506104550685, 0.1894506104550685, 0.18260341504492358, 0.18260341504492358, 0.16915651939500254,
-              0.16915651939500254, 0.14959598881657674, 0.14959598881657674, 0.12462897125553388, 0.12462897125553388,
-              0.09515851168249279, 0.09515851168249279, 0.062253523938647894, 0.062253523938647894,
-              0.027152459411754096,
-              0.027152459411754096]
-
-    raiz17 = [0, -0.17848418149584785, 0.17848418149584785, -0.3512317634538763, 0.3512317634538763,
-              -0.5126905370864769,
-              0.5126905370864769, -0.6576711592166907, 0.6576711592166907, -0.7815140038968014, 0.7815140038968014,
-              -0.8802391537269859, 0.8802391537269859, -0.9506755217687678, 0.9506755217687678, -0.9905754753144174,
-              0.9905754753144174]
-    peso17 = [0.17944647035620653, 0.17656270536699264, 0.17656270536699264, 0.16800410215645004, 0.16800410215645004,
-              0.15404576107681028, 0.15404576107681028, 0.13513636846852548, 0.13513636846852548, 0.11188384719340397,
-              0.11188384719340397, 0.08503614831717918, 0.08503614831717918, 0.0554595293739872, 0.0554595293739872,
-              0.02414830286854793, 0.02414830286854793]
-
-    raiz18 = [-0.0847750130417353, 0.0847750130417353, -0.2518862256915055, 0.2518862256915055, -0.41175116146284263,
-              0.41175116146284263, -0.5597708310739475, 0.5597708310739475, -0.6916870430603532, 0.6916870430603532,
-              -0.8037049589725231, 0.8037049589725231, -0.8926024664975557, 0.8926024664975557, -0.9558239495713977,
-              0.9558239495713977, -0.9915651684209309, 0.9915651684209309]
-    peso18 = [0.1691423829631436, 0.1691423829631436, 0.16427648374583273, 0.16427648374583273, 0.15468467512626524,
-              0.15468467512626524, 0.14064291467065065, 0.14064291467065065, 0.12255520671147846, 0.12255520671147846,
-              0.10094204410628717, 0.10094204410628717, 0.07642573025488905, 0.07642573025488905, 0.0497145488949698,
-              0.0497145488949698, 0.02161601352648331, 0.02161601352648331]
-
-    raiz19 = [0, -0.16035864564022537, 0.16035864564022537, -0.31656409996362983, 0.31656409996362983,
-              -0.46457074137596094,
-              0.46457074137596094, -0.600545304661681, 0.600545304661681, -0.7209661773352294, 0.7209661773352294,
-              -0.8227146565371428, 0.8227146565371428, -0.9031559036148179, 0.9031559036148179, -0.96020815213483,
-              0.96020815213483, -0.9924068438435844, 0.9924068438435844]
-    peso19 = [0.1610544498487837, 0.15896884339395434, 0.15896884339395434, 0.15276604206585967, 0.15276604206585967,
-              0.1426067021736066, 0.1426067021736066, 0.12875396253933621, 0.12875396253933621, 0.11156664554733399,
-              0.11156664554733399, 0.09149002162245, 0.09149002162245, 0.06904454273764123, 0.06904454273764123,
-              0.0448142267656996, 0.0448142267656996, 0.019461788229726478, 0.019461788229726478]
-
-    raiz20 = [-0.07652652113349734, 0.07652652113349734, -0.22778585114164507, 0.22778585114164507,
-              -0.37370608871541955,
-              0.37370608871541955, -0.5108670019508271, 0.5108670019508271, -0.636053680726515, 0.636053680726515,
-              -0.7463319064601508, 0.7463319064601508, -0.8391169718222188, 0.8391169718222188, -0.912234428251326,
-              0.912234428251326, -0.9639719272779138, 0.9639719272779138, -0.9931285991850949, 0.9931285991850949]
-    peso20 = [0.15275338713072584, 0.15275338713072584, 0.14917298647260374, 0.14917298647260374, 0.14209610931838204,
-              0.14209610931838204, 0.13168863844917664, 0.13168863844917664, 0.11819453196151841, 0.11819453196151841,
-              0.10193011981724044, 0.10193011981724044, 0.08327674157670475, 0.08327674157670475, 0.06267204833410907,
-              0.06267204833410907, 0.04060142980038694, 0.04060142980038694, 0.017614007139152118, 0.017614007139152118]
-
-    # funcs = ['2', 'x - 1', 'x**2 + 1', 'x**3 + x - 3', '0.5 * x**4 - 3 * x**2 + 1', 'x**5 - 4 * x + 2', 'x**7-x']
-    # a = -2.119
-    # b = 2.165
-    # values = [-1.803, 0.383, 1.841]
-    # order = 8
-    # h = (b - a) / 10
-    # method = ['romberg', order, h]
-
-    funcs = ['1', 'x', 'math.cos(x)', 'x**2', 'math.sin(x)', 'x**3', 'math.cos(2*x)', 'x**4', 'math.sin(3*x)']
-    a = 0.05096
-    b = 2.06606
-    #regra dos trapézios com 720 subintervalos para determinar o erro
     n = 720
-    # quadratura gaussina
-    exact_for_degree_less_than = 24
-    values = [0.61827, 1.12133, 1.98273]
-    exact_for_degree_less_than = 24
-    order = str(int(exact_for_degree_less_than / 2))
-    txt_order = ['raiz' + order, 'peso' + order]
-    method = ['quadratura', locals()[txt_order[0]], locals()[txt_order[1]]]
+    print(trapeze_sum(lambda x: (f(x)-g(x))**2, a, b, n))
 
-    funcs = criar_funcoes(funcs)
+    # t = np.linspace(a, b, 200)
+    # ft = [f(ti) for ti in t]
+    # gt = [g(ti) for ti in t]
 
-    coefs = best_func(f, funcs, a, b, method)
-
-    coefs = [ci for ci in coefs]
-
-    for i in coefs:
-        print(f'{i}, ')
-
-
-    def g(x):
-        return sum(ci * fi(x) for ci, fi in zip(coefs, funcs))
-
-
-    for x in values:
-        print(f'{g(x)}, ')
-
-   
-
-
-    def func_erro(x):
-        return (f(x) - g(x)) ** 2
-
-
-    order = str(int(exact_for_degree_less_than / 2))
-    txt_order = ['raiz' + order, 'peso' + order]
-
-    erro = trapz(func_erro, a, b, n)
-
-    print(f'{erro}')
+    # plt.plot(t, ft, label = 'function', color = "red")
+    # plt.plot(t, gt, label = 'aproximation', color = "green")
+    # plt.legend()
+    # plt.savefig("Otimização01.png")

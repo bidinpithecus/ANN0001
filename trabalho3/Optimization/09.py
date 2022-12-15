@@ -1,26 +1,41 @@
 """Seja Pn(x) o polinômio de Legendre de grau n. Encontre os coeficientes da combinação linear
 g(x)=∑k=030ckPk(x)
-que melhor se aproxima da função f(x)=tanh(3x)cos(3x) no intervalo [−1,1]. Para o cálculo dos coeficientes ck, use o método de Romberg com h=(b−a)/10 e erro da ordem de O(h8). Em seguida calcule g(x) para os seguintes valores de x,
-x1=−0.676, x2=−0.161 e x3=0.554.
-A função g(x) é uma aproximação para a função f(x) no intervalo [−1,1] com erro dado por
-erro=∫1−1[f(x)−g(x)]2dx.
+que melhor se aproxima da função f(x)=tanh(3x)cos(3x) no intervalo [-1,1]. Para o cálculo dos coeficientes ck, use o método de Romberg com h=(b-a)/10 e erro da ordem de O(h8). Em seguida calcule g(x) para os seguintes valores de x,
+x1=-0.676, x2=-0.161 e x3=0.554.
+A função g(x) é uma aproximação para a função f(x) no intervalo [-1,1] com erro dado por
+erro=∫1-1[f(x)-g(x)]2dx.
 Use a regra de Simpson com 256 subintervalos para determinar o erro."""
-
 
 import math
 import numpy as np
 
 def legendre(x, n):
+    f0 = 1.0
+    f1 = x
+    fn = 0
+
+    ni = 2
+
     if n == 0:
-        return 1
+      return 1.0
+
     elif n == 1:
-        return x
+      return x
+
     else:
-        return ((2 * n - 1) * x * legendre(x, n - 1) - (n - 1) * legendre(x, n - 2)) / n
+
+      while ni <= n:
+          fn = ((2* ni - 1) * x * f1 - (ni - 1) * f0) / ni
+          f0 = f1
+          f1 = fn
+          ni += 1 
+
+    return fn
 
 def build_legendre_polynomial(n):
     def temp(t):
         return legendre(t, n)
+
     return temp
 
 def romberg(coluna_f1):
@@ -123,7 +138,7 @@ if __name__ == '__main__':
     b = 1
     subintervalos = 256
     order = 8
-    values = [-0.676,-0.161,0.554]
+    values = [-0.552, -0.103, 0.492]
     h = (b-(a))/10
     method = ['romberg', order, h]
     

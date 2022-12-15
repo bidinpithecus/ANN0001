@@ -278,9 +278,8 @@ if __name__ == '__main__':
     funcs = [build_legendre_polynomial(i) for i in range(grau)]
     a = -1
     b = 1
-    values = [-0.494, 0.154, 0.512]
+    values = [-0.607, -0.038, 0.869]
     method = ['trapz', subintervalos]
-
 
     coefs = best_func(f, funcs, a, b, method)
 

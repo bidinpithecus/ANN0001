@@ -273,14 +273,11 @@ if __name__ == '__main__':
     num_intervals = 256
     num_coeffs = 21
     method = ['simps', num_intervals]
-    values = [-1.841 , 0.734 , 2.073]
+    values = [-2.793, 0.59, 2.789]
     termos = int((num_coeffs - 1) / 2)
     a = -3.141592653589793
     b =  3.141592653589793
 
-    
-    
-    
     if method[0] == 'trapz':
         c1 = trapz(f, a, b, num_intervals) / (2*math.pi)
         a1 = [coeff_a(f, ni, num_intervals, method) for ni in range(1, termos+1)]
@@ -300,7 +297,6 @@ if __name__ == '__main__':
     imprimir_coeffs(c1, a1, b1)
 
     serie = fourier(c1, a1, b1)
-    
 
     for x in values:
         print(f'{serie(x)}, ')
@@ -308,16 +304,12 @@ if __name__ == '__main__':
     # quadratura gaussina
     exact_for_degree_less_than = 24
 
-
     def func_erro(x):
         return (f(x) - serie(x)) ** 2
-
 
     order = str(int(exact_for_degree_less_than / 2))
     txt_order = ['raiz' + order, 'peso' + order]
 
     erro = quadratura(change(func_erro, a, b), locals()[txt_order[0]], locals()[txt_order[1]])
 
-    print(f'{erro}')
-
-   
+    print(f'{erro}')   

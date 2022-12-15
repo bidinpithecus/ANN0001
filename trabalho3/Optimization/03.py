@@ -1,14 +1,14 @@
-"""
-Sejam
-f1(x)=2, f2(x)=x-1, f3(x)=x2+1, f4(x)=x3+x-3, f5(x)=12x4-3x2+1, f6(x)=x5-4x+2  e  f7(x)=x7-x
+
+""" Sejam
+f1(x)=2, f2(x)=x−1, f3(x)=x2+1, f4(x)=x3+x−3, f5(x)=12x4−3x2+1, f6(x)=x5−4x+2  e  f7(x)=x7−x
 Encontre os coeficientes da combinação linear
 g(x)=c1f1(x)+c2f2(x)+c3f3(x)+c4f4(x)+c5f5(x)+c6f6(x)+c7f7(x)
-que melhor se aproxima da função f(x)=x2cos(xsin(ln(1+x2))) no intervalo [a,b], com a=-2.12475 e b=2.10858. Para o cálculo dos coeficientes ck, use o método de Romberg com h=(b-a)/10 e erro da ordem de O(h8). Em seguida calcule g(x) para os seguintes valores de x
-x1=-1.63682, x2=-0.18103 e x3=1.66951.
-A função g(x) é uma aproximação para a função f(x) no intervalo [-2.12475,2.10858] com erro dado por
-erro=∫2.10858-2.12475[f(x)-g(x)]2dx.
-Use a regra de Simpson com 256 subintervalos para determinar o erro.
-"""
+que melhor se aproxima da função f(x)=x2cos(xsin(ln(1+x2))) no intervalo [a,b], com a=−2.03528 e b=2.01315. Para o cálculo dos coeficientes ck, use o método de Romberg com h=(b−a)/10 e erro da ordem de O(h8). Em seguida calcule g(x) para os seguintes valores de x
+x1=−1.85864, x2=−0.36118 e x3=0.98941.
+A função g(x) é uma aproximação para a função f(x) no intervalo [−2.03528,2.01315] com erro dado por
+erro=∫2.01315−2.03528[f(x)−g(x)]2dx.
+Use a regra de Simpson com 256 subintervalos para determinar o erro. """
+
 
 import math
 import numpy as np
@@ -128,11 +128,12 @@ def simpsPonto(x, y):
 def f(x):
     return x**2 * math.cos(x * math.sin(math.log(1 + x**2)))
 
+
 if __name__ == '__main__':
     funcs = ['2', 'x - 1', 'x**2 + 1', 'x**3 + x - 3', '0.5 * x**4 - 3 * x**2 + 1', 'x**5 - 4 * x + 2', 'x**7-x']
-    a = -2.12475
-    b = 2.10858
-    values = [-1.63682, -0.18103, 1.66951]
+    a = -2.03528
+    b = 2.01315
+    values = [-1.85864, -0.36118 , 0.98941]
     order = 8
     h = (b - (a)) / 10
     method = ['romberg', order, h]

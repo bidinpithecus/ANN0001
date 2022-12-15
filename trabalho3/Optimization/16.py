@@ -1,22 +1,93 @@
-import math
+import numpy as np
 
-'''
-Em uma pessoa contaminada com sarampo, o nível de vírus N (medido em número de células 
-infectadas por mL de plasma de sangue) atinge um pico em cerca de t=12 dias 
-(quando aparecem erupções cutâneas) e, então, diminui bem rápido como resultado da resposta 
-imunológica. A área sob o gráfico de N(t) de t=0 a t=12 (como mostrado na figura) 
-é igual à quantidade total de infecção necessária para desenvolver sintomas 
-(medida em densidade de células infectadas x tempo). A função N tem sido modelada pela função:
-    f(t)=-t(t-21)(t+1)
 
-Usando
-a) a regra dos trapézios com 31 subintervalos
-b) a regra de Simpson com 14 subintervalos
-c) o método de Romberg com h=12/10 para obter uma aproximação com erro O(h8)
-d) o método da Quadratura Gaussiana que seja exato em polinômios de grau menor que 6
-estime a quantidade total de infecção necessária para desenvolver os sintomas de sarampo.
 
-'''
+def trapz(f, a, b, n):
+    h = abs(b - a) / n
+    sum_fx = 0
+
+    for i in range(1, n):
+        sum_fx += f(a + i * h)
+
+    return (f(a) + 2 * sum_fx + f(b)) * (h / 2)
+
+
+def simps(f, a, b, n):
+    if n % 2 != 0:
+        print('O valor n deve ser par')
+        return None
+
+    num_parabolas = n / 2
+    soma = 0
+    h = (b - a) / n
+
+    for i in range(int(num_parabolas)):
+        x0 = a + (2 * i) * h
+        x1 = a + (2 * i + 1) * h
+        x2 = a + (2 * i + 2) * h
+        soma += f(x0) + 4 * f(x1) + f(x2)
+
+    soma *= h / 3
+
+    return soma
+
+
+def trapz_romberg(f, a, b, h):
+    n = int((b - a) / h)
+    soma = 0
+
+    for k in range(1, n):
+        soma += f(a + k * h)
+
+    return (h / 2) * (f(a) + 2 * soma + f(b))
+
+
+def romberg(coluna_f1):
+    coluna_f1 = [i for i in coluna_f1]
+    n = len(coluna_f1)
+    for j in range(n - 1):
+        temp_col = [0] * (n - 1 - j)
+        for i in range(n - 1 - j):
+            power = j + 1
+            temp_col[i] = (4 ** power * coluna_f1[i + 1] - coluna_f1[i]) / (4 ** power - 1)
+        coluna_f1[:n - 1 - j] = temp_col
+        # print(f'F_{j+2} = {temp_col}')
+  
+    return coluna_f1[0]
+
+
+def quadratura(funcao, pontos, pesos):
+    soma = 0
+
+    for xk, ck in zip(pontos, pesos):
+        soma += ck * funcao(xk)
+
+    return soma
+
+
+def change(f, a, b):
+    def g(u):
+        return f((b + a) / 2 + (b - a) * u / 2) * (b - a) / 2
+
+    return g
+
+def produto_escalar(f1, f2, w, a, b, method):
+  
+  def func(x):
+    return f1(x) * f2(x) * w(x)
+
+  if method[0] == 'trapz':
+      return trapz(func, a, b, method[1])
+  elif method[0] == 'simps':
+      return trapz(func, a, b, method[1])
+  elif method[0] == 'romberg':
+      tam = int(method[1] / 2)
+      hs = [method[2] / 2 ** ki for ki in range(tam)]
+      coluna_f1 = [trapz_romberg(func, a, b, hi) for hi in hs]
+      return romberg(coluna_f1)
+  elif method[0] == 'quadratura':
+      return quadratura(change(func, a, b), method[1], method[2])
+  
 
 if __name__ == '__main__':
     raiz2 = [-0.5773502691896257, 0.5773502691896257]
@@ -142,34 +213,21 @@ if __name__ == '__main__':
               0.10193011981724044, 0.10193011981724044, 0.08327674157670475, 0.08327674157670475, 0.06267204833410907,
               0.06267204833410907, 0.04060142980038694, 0.04060142980038694, 0.017614007139152118, 0.017614007139152118]
 
-
-    def f(nome_funcao, value):
-        x = value
-        return eval(nome_funcao)
-        
-
-    def quadratura(funcao, pontos, pesos):
-        soma = 0
-
-        for xk, ck in zip(pontos, pesos):
-            soma += ck*funcao(xk)
-
-        return soma
-
-
-    def change(nome_funcao, a, b):
-        def g(u):
-            return f(nome_funcao, (b+a)/2 + (b-a)*u/2) * (b-a)/2
-        return g
-
-
+    def f1(x): return (x**3) + 1
     
-    funcs = ['-x*(x-21)*(x+1)']
-    a = [0]
-    b = [12]
-    exact_for_degree_less_than = [6]
-    for i in range(len(funcs)):
-        order = str(int(exact_for_degree_less_than[i]/2))
-        txt_order = ['raiz'+order, 'peso'+order]
-        r = quadratura(change(funcs[i], a[i], b[i]), locals()[txt_order[0]], locals()[txt_order[1]])
-        print(f'{r}\n')
+    def f2(x): return 1+np.sin(3*x-1)
+    
+    def w(x): return np.exp(-x)
+    
+    
+    # Exemplo 01:
+    a,b = [-1.499,1.165]
+    exact_for_degree_less_than = 16
+    order = str(int(exact_for_degree_less_than / 2))
+    txt_order = ['raiz' + order, 'peso' + order]
+    method =  ['quadratura', locals()[txt_order[0]], locals()[txt_order[1]]]
+    
+    
+    
+    
+    print(produto_escalar(f1,f2,w,a,b,method))

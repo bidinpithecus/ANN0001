@@ -4,11 +4,11 @@ import numpy as np
 '''
 Seja Pn(x) o polinômio de Legendre de grau n. Encontre os coeficientes da combinação linear
 g(x)=∑k=010ckPk(x)
-que melhor se aproxima da função f(x)=xcos(10x2e−x2) no intervalo [−1,1]. Para o cálculo dos coeficientes ck, use a regra de Simpson com 256 subintervalos. Em seguida calcule g(x) para os seguintes valores de x,
-x1=−0.583, x2=0.07 e x3=0.41.
-A função g(x) é uma aproximação para a função f(x) no intervalo [−1,1] com erro dado por
-erro=∫1−1[f(x)−g(x)]2dx.
-Use o método de Romberg com h=(b−a)/10 e erro da ordem de O(h8) para determinar o erro.
+que melhor se aproxima da função f(x)=xcos(10x2e-x2) no intervalo [-1,1]. Para o cálculo dos coeficientes ck, use a regra de Simpson com 256 subintervalos. Em seguida calcule g(x) para os seguintes valores de x,
+x1=-0.583, x2=0.07 e x3=0.41.
+A função g(x) é uma aproximação para a função f(x) no intervalo [-1,1] com erro dado por
+erro=∫1-1[f(x)-g(x)]2dx.
+Use o método de Romberg com h=(b-a)/10 e erro da ordem de O(h8) para determinar o erro.
 '''
 
 def trapz(f, a, b, n):
@@ -317,8 +317,8 @@ if __name__ == '__main__':
     b = 1
     subintervalos = 256
     order = 8
-    values = [-0.583, 0.07, 0.41]
-    method = ['simps', subintervalos]
+    values = [-0.773, 0.058, 0.901]
+    method = ['romberg', subintervalos]
 
     coefs = best_func(f, funcs, a, b, method)
 

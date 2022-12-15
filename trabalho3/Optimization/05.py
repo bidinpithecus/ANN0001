@@ -73,11 +73,9 @@ def f(x):
     return x * sin(6 * exp(-x**2))
 
 if __name__ == '__main__':  
-
-
     a = -3.141592653589793
     b = 3.141592653589793
-    values = [-1.454, 0.696, 2.336]
+    values = [-2.789, 0.626, 1.362]
     subintervalos = 1024
     grau = 11 
     order = 8

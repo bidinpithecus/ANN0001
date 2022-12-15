@@ -1,14 +1,12 @@
-"""
-Sejam
+"""Sejam
 f1(x)=1, f2(x)=x, f3(x)=x2, f4(x)=x3, f5(x)=x4  e  f6(x)=x5
 Encontre os coeficientes da combinação linear
 g(x)=c1f1(x)+c2f2(x)+c3f3(x)+c4f4(x)+c5f5(x)+c6f6(x)
-que melhor se aproxima da função f(x)=2sin(x)+cos(−x2) no intervalo [a,b], com a=−1.07703 e b=2.49721. Para o cálculo dos coeficientes ck, use a regra dos trapézios com 256 subintervalos. Em seguida calcule g(x) para os seguintes valores de x
-x1=−0.79436, x2=1.15428 e x3=1.75505.
-A função g(x) é uma aproximação para a função f(x) no intervalo [−1.07703,2.49721] com erro dado por
-erro=∫2.49721−1.07703[f(x)−g(x)]2dx.
-Use a regra dos trapézios com 512 subintervalos para determinar o erro.
-"""
+que melhor se aproxima da função f(x)=2sin(x)+cos(−x2) no intervalo [a,b], com a=−0.94689 e b=2.42677. Para o cálculo dos coeficientes ck, use a regra dos trapézios com 256 subintervalos. Em seguida calcule g(x) para os seguintes valores de x
+x1=−0.22787, x2=0.86787 e x3=1.96574.
+A função g(x) é uma aproximação para a função f(x) no intervalo [−0.94689,2.42677] com erro dado por
+erro=∫2.42677−0.94689[f(x)−g(x)]2dx.
+Use a regra dos trapézios com 512 subintervalos para determinar o erro."""
 import numpy as np
 import math
 
@@ -51,18 +49,21 @@ def comb(c, funcs):
     return g
 
 if __name__ == '__main__':
+
     # mudar aqui
-    a = -1.07703
-    b = 2.49721
-    x1 = -0.79436
-    x2 = 1.15428
-    x3 = 1.75505
+    a = -0.94689
+    b = 2.42677
+    x1 = -0.22787
+    x2 = 0.86787 
+    x3 = 1.96574
     subintervalo_para_coeficientes = 256
     subintervalo_para_erro = 512
 
     def func(x):
         # mudar aqui
         return 2 * np.sin(x) + np.cos(-x**2)
+
+    
 
     funcs_str =  ['1', 'x', 'x**2', 'x**3', 'x**4', 'x**5']
     funcs = []
